@@ -1,99 +1,521 @@
 <!doctype html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
   <title>Генератор экзаменационного билета по JVM/Java</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: #030712;
+      --bg-elevated: rgba(10, 14, 30, 0.78);
+      --bg-card: rgba(13, 18, 35, 0.86);
+      --border-subtle: rgba(120, 156, 255, 0.18);
+      --border-strong: rgba(255, 255, 255, 0.08);
+      --accent: #6dd3ff;
+      --accent-2: #7c3aed;
+      --accent-3: #22d3ee;
+      --accent-alt: #fbbf24;
+      --glow: rgba(109, 211, 255, 0.35);
+      --text-main: #eef2ff;
+      --text-muted: #c7d2fe;
+      --text-soft: #9ca3af;
+      --shadow-strong: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
     * {
       box-sizing: border-box;
     }
+
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("./fonts/SpaceGrotesk-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("./fonts/SpaceGrotesk-Medium.ttf") format("truetype");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("./fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Space Grotesk";
+      src: url("./fonts/SpaceGrotesk-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Manrope";
+      src: url("./fonts/Manrope-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Manrope";
+      src: url("./fonts/Manrope-Medium.ttf") format("truetype");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Manrope";
+      src: url("./fonts/Manrope-SemiBold.ttf") format("truetype");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      font-family: "Space Grotesk", "Manrope", "DM Sans", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
+      background: radial-gradient(circle at 20% 20%, rgba(109, 211, 255, 0.08), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.12), transparent 40%),
+        radial-gradient(circle at 60% 80%, rgba(34, 211, 238, 0.12), transparent 35%),
+        #01030a;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 16px;
+      padding: 22px 18px 26px;
+      position: relative;
+      overflow-x: hidden;
     }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -30%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(109, 211, 255, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.12), transparent 35%),
+        radial-gradient(circle at 20% 70%, rgba(34, 211, 238, 0.12), transparent 35%);
+      filter: blur(40px);
+      opacity: 0.9;
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #6dd3ff, #7c3aed);
+      border-radius: 999px;
+    }
+
     .app {
-      max-width: 960px;
+      max-width: 1100px;
       width: 100%;
-      background: #020617;
-      border-radius: 16px;
-      padding: 24px 20px 28px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
-      border: 1px solid #1e293b;
+      background: linear-gradient(135deg, rgba(13, 18, 35, 0.9), rgba(7, 12, 24, 0.9));
+      border-radius: 20px;
+      padding: 26px 22px 30px;
+      box-shadow: var(--shadow-strong), 0 0 80px rgba(109, 211, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
     }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(109, 211, 255, 0.25), transparent 50%),
+        radial-gradient(circle at 90% 20%, rgba(124, 58, 237, 0.25), transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(34, 211, 238, 0.25), transparent 50%);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -2;
+      filter: blur(40px);
+    }
+
+    .app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), transparent 35%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+    }
+
     h1 {
-      margin: 0 0 8px;
-      font-size: 24px;
+      margin: 0 0 6px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    .title-pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, rgba(109, 211, 255, 0.18), rgba(124, 58, 237, 0.26));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e0e7ff;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
     .subtitle {
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #9ca3af;
+      margin-bottom: 16px;
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 720px;
+      line-height: 1.6;
     }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 11px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .badge-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+    }
+
+    .badge strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
     .controls {
       display: flex;
-      gap: 12px;
+      flex-wrap: wrap;
+      gap: 10px 12px;
       align-items: center;
       margin-bottom: 18px;
-      flex-wrap: wrap;
     }
+
+    .controls-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      flex: 1 1 auto;
+      min-width: 220px;
+    }
+
+    .controls-secondary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
     button {
       border: none;
       outline: none;
       cursor: pointer;
       border-radius: 999px;
-      padding: 10px 18px;
+      padding: 12px 20px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.02em;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #052e16;
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
-      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, background 0.08s ease-out;
+      background: linear-gradient(135deg, #6dd3ff, #7c3aed);
+      color: #041018;
+      box-shadow: 0 16px 40px rgba(109, 211, 255, 0.4);
+      transition:
+        transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        background 0.12s ease-out,
+        filter 0.12s ease-out;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
     }
+
     button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(16, 185, 129, 0.45);
-      background: linear-gradient(135deg, #4ade80, #22c55e);
+      box-shadow: 0 18px 50px rgba(124, 58, 237, 0.48);
+      background: linear-gradient(135deg, #7c3aed, #6dd3ff);
+      filter: brightness(1.05);
     }
+
     button:active {
       transform: translateY(0);
-      box-shadow: 0 5px 12px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 10px 24px rgba(109, 211, 255, 0.4);
     }
-    .ticket-meta {
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+      font-weight: 600;
+      padding-inline: 16px;
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+      box-shadow: 0 8px 28px rgba(124, 58, 237, 0.35);
+      filter: none;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      box-shadow: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       font-size: 13px;
-      color: #9ca3af;
+      font-weight: 600;
     }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      box-shadow: 0 12px 24px rgba(109, 211, 255, 0.25);
+    }
+
+    .btn-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .control-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      white-space: nowrap;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .control-inline span {
+      white-space: nowrap;
+    }
+
+    select {
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-size: 12px;
+      padding: 5px 22px 5px 9px;
+      outline: none;
+      appearance: none;
+      position: relative;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #9ca3af 50%),
+        linear-gradient(135deg, #9ca3af 50%, transparent 50%);
+      background-position:
+        calc(100% - 10px) calc(50% - 2px),
+        calc(100% - 5px) calc(50% - 2px);
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+
+    input[type="text"] {
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-size: 12px;
+      padding: 7px 12px;
+      outline: none;
+      min-width: 160px;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(109, 211, 255, 0.35);
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(109, 211, 255, 0.35);
+    }
+
+    .range-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 180px;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 90px;
+      height: 4px;
+      border-radius: 999px;
+      background: #111827;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6dd3ff, #7c3aed);
+      box-shadow: 0 0 0 2px #041018, 0 0 0 6px rgba(109, 211, 255, 0.25);
+      border: none;
+      margin-top: -5px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6dd3ff, #7c3aed);
+      border: none;
+      box-shadow: 0 0 0 2px #041018, 0 0 0 6px rgba(109, 211, 255, 0.25);
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 4px;
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    .range-value {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    .ticket-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
     .ticket-meta span {
       opacity: 0.9;
     }
-    .blocks {
+
+    #ticketContainer {
       margin-top: 18px;
+      min-height: 80px;
+    }
+
+    .blocks {
+      margin-top: 2px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 14px;
+      animation: fadeInUp 0.22s ease-out;
     }
+
     .block-card {
-      background: radial-gradient(circle at top left, #1e293b, #020617);
-      border-radius: 14px;
-      padding: 14px 14px 12px;
-      border: 1px solid #1f2937;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+      border-radius: 16px;
+      padding: 16px 16px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 40px rgba(109, 211, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transform-origin: top left;
+      animation: cardPopIn 0.25s ease-out;
+      backdrop-filter: blur(6px);
     }
+
+    .block-card::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(109, 211, 255, 0.3), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.25), transparent 60%),
+        radial-gradient(circle at 40% 90%, rgba(34, 211, 238, 0.2), transparent 55%);
+      opacity: 0.4;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .block-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .block-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
     .block-title {
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 6px;
-      color: #e5e7eb;
+      color: var(--text-main);
     }
+
     .block-tag {
       display: inline-flex;
       align-items: center;
@@ -103,51 +525,585 @@
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      background: rgba(15, 118, 110, 0.15);
-      color: #67e8f9;
+      background: rgba(109, 211, 255, 0.16);
+      color: #bde5ff;
+    }
+
+    .block-tag-badge {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(109, 211, 255, 0.2);
+    }
+
+    .block-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
       margin-bottom: 6px;
     }
+
     .question-text {
       font-size: 13px;
       line-height: 1.45;
-      color: #d1d5db;
+      color: #e5e7eb;
     }
+
     .question-number {
       font-weight: 600;
       color: #a5b4fc;
+      margin-right: 4px;
     }
+
     .empty-state {
       margin-top: 8px;
       font-size: 14px;
-      color: #9ca3af;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed var(--border-subtle);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
     }
+
     .hint {
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 12px;
-      color: #6b7280;
+      color: var(--text-soft);
     }
-    @media (max-width: 600px) {
-      .app {
-        padding: 18px 14px 22px;
+
+    .hint strong {
+      color: #c7d2fe;
+    }
+
+    .history {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .history-title {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 6px;
+    }
+
+    .history-empty {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .history-item {
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .history-item-title {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .history-item-time {
+      color: var(--text-muted);
+    }
+
+    .history-item-mode {
+      color: #a5b4fc;
+      font-size: 11px;
+    }
+
+    .history-item-blocks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .history-pill {
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: rgba(15, 118, 110, 0.18);
+      color: #67e8f9;
+    }
+
+    .history-item-name {
+      color: #c7d2fe;
+      font-weight: 600;
+    }
+
+    .history-rename-btn {
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-soft);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.12s ease-out, color 0.12s ease-out, border-color 0.12s ease-out;
+    }
+
+    .history-rename-btn:hover {
+      background: rgba(109, 211, 255, 0.12);
+      color: var(--text-main);
+      border-color: rgba(109, 211, 255, 0.5);
+    }
+
+    .all-questions {
+      margin-top: 16px;
+      padding: 10px 10px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .all-questions summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      outline: none;
+    }
+
+    .all-questions summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .all-questions-toggle {
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .all-questions-arrow {
+      font-size: 14px;
+      opacity: 0.7;
+      transition: transform 0.15s ease-out;
+    }
+
+    .all-questions[open] .all-questions-arrow {
+      transform: rotate(90deg);
+    }
+
+    .all-questions-content {
+      margin-top: 8px;
+      max-height: 260px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .all-questions-block {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(55, 65, 81, 0.8);
+    }
+
+    .all-questions-block:first-child {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 4px;
+    }
+
+    .all-questions-block-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .all-questions-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .all-questions-list li {
+      margin-bottom: 2px;
+      line-height: 1.4;
+    }
+
+    .question-number-tag {
+      color: #a5b4fc;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    /* Рулетка */
+
+    .roulette-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(109, 211, 255, 0.08), transparent 40%),
+        radial-gradient(circle at 70% 20%, rgba(124, 58, 237, 0.12), transparent 45%),
+        rgba(4, 6, 14, 0.82);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      padding: 16px;
+      animation: overlayFadeIn 0.18s ease-out;
+    }
+
+    .roulette-overlay-fade-out {
+      animation: overlayFadeOut 0.16s ease-in forwards;
+    }
+
+    .roulette-panel {
+      max-width: 960px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(13, 18, 35, 0.9), rgba(7, 12, 24, 0.92));
+      border-radius: 18px;
+      padding: 16px 16px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(109, 211, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .roulette-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .roulette-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .roulette-title span {
+      font-size: 18px;
+    }
+
+    .roulette-subtitle {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .roulette-subtitle strong {
+      color: #c7d2fe;
+    }
+
+    .roulette-progress {
+      min-width: 170px;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .progress-label span {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-bar {
+      position: relative;
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(30, 64, 175, 0.5);
+    }
+
+    .progress-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-alt));
+      transform-origin: left center;
+      transform: scaleX(1);
+      transition: transform 0.04s linear;
+    }
+
+    .roulette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-top: 6px;
+      padding-right: 2px;
+    }
+
+    .mini-ticket {
+      min-width: 0;
+      border-radius: 10px;
+      padding: 8px 7px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.75;
+      transform: translateY(0);
+      transition:
+        background 0.12s ease-out,
+        border-color 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        transform 0.12s ease-out,
+        opacity 0.12s ease-out;
+    }
+
+    .mini-ticket-title {
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+      font-size: 11px;
+    }
+
+    .mini-ticket-blocks {
+      color: #a5b4fc;
+      margin-bottom: 1px;
+    }
+
+    .mini-ticket-questions {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .mini-ticket.is-hot {
+      border-color: rgba(109, 211, 255, 0.7);
+      background: radial-gradient(circle at top left, rgba(109, 211, 255, 0.18), rgba(124, 58, 237, 0.08));
+      box-shadow:
+        0 0 0 1px rgba(109, 211, 255, 0.65),
+        0 12px 30px rgba(124, 58, 237, 0.35);
+      transform: translateY(-1px) scale(1.02);
+      opacity: 1;
+    }
+
+    .roulette-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .roulette-actions-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .roulette-hint {
+      font-size: 11px;
+      color: var(--text-soft);
+      max-width: 360px;
+    }
+
+    .roulette-stage-label {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin: -2px 0 2px;
+    }
+
+    .roulette-picked {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+      min-height: 12px;
+    }
+
+    .roulette-picked-pill {
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(109, 211, 255, 0.12);
+      border: 1px solid rgba(109, 211, 255, 0.35);
+      color: #dbeafe;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .roulette-picked-pill strong {
+      color: #c7d2fe;
+      font-weight: 600;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
       }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes cardPopIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes overlayFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(1.02);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes overlayFadeOut {
+      from {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: scale(1.02);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        padding: 18px 12px 22px;
+        border-radius: 14px;
+      }
+
       h1 {
         font-size: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .controls-secondary {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .control-inline {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .range-wrapper {
+        width: 100%;
+      }
+
+      .roulette-panel {
+        padding: 14px 10px 12px;
+      }
+
+      .roulette-grid {
+        max-height: 320px;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="app">
-    <h1>Генератор билета по JVM / Java Internals</h1>
+    <h1>
+      Генератор билета по JVM / Java Internals
+      <span class="title-pill">exam mode</span>
+    </h1>
+
     <div class="subtitle">
-      Нажми «Сгенерировать билет», чтобы случайно выбрать 3 блока из 5 и по одному вопросу в каждом.
+      Нажми «Запустить генерацию», чтобы случайно получить билет из 3 блоков и 3 вопросов. Можно включить режим
+      «рулетки», чтобы выбор выглядел как мини-лотерея.
     </div>
 
+    <div class="badges" id="statsBadges"></div>
+
     <div class="controls">
-      <button id="generateBtn">Сгенерировать билет</button>
-      <div class="ticket-meta" id="ticketMeta">
-        <span>Билет ещё не сгенерирован.</span>
+      <div class="controls-main">
+        <button id="generateBtn">
+          <span class="btn-icon">🎲</span>
+          <span>Запустить генерацию</span>
+        </button>
+
+        <div class="control-inline">
+          <span>Название</span>
+          <input type="text" id="ticketNameInput" placeholder="например, Иванов" maxlength="80">
+        </div>
       </div>
+
+      <div class="controls-secondary">
+        <div class="control-inline" id="durationControl">
+          <span>Длительность рулетки</span>
+          <div class="range-wrapper">
+            <input type="range" id="durationRange" min="2" max="10" step="1" value="5">
+            <span class="range-value"><span id="durationLabel">5</span> с</span>
+          </div>
+        </div>
+        <button class="btn-secondary" id="instantBtn" title="Сгенерировать без рулетки">
+          <span class="btn-icon">⚡</span>
+          Мгновенно
+        </button>
+      </div>
+    </div>
+
+    <div class="ticket-meta" id="ticketMeta">
+      <span>Билет ещё не сгенерирован. Нажми кнопку выше.</span>
     </div>
 
     <div id="ticketContainer">
@@ -157,8 +1113,24 @@
     </div>
 
     <div class="hint">
-      Вопросы пронумерованы так же, как в исходном списке (1–38), чтобы совпадали с конспектами.
+      Вопросы пронумерованы так же, как в исходном списке (<strong>1–38</strong>), чтобы совпадали с конспектами.
     </div>
+
+    <div class="history">
+      <div class="history-title">История билетов за эту сессию</div>
+      <div class="history-empty" id="historyEmpty">
+        Пока ничего не выпало — первый билет станет #1.
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <details class="all-questions">
+      <summary>
+        <span class="all-questions-toggle">Показать все блоки и вопросы</span>
+        <span class="all-questions-arrow">▶</span>
+      </summary>
+      <div class="all-questions-content" id="allQuestionsContent"></div>
+    </details>
   </div>
 
   <script>
@@ -234,6 +1206,27 @@
       }
     ];
 
+    // Состояние
+    let currentTicket = null;
+    let currentTicketName = "";
+    let currentTicketInfo = null;
+    let ticketCounter = 0;
+    const ticketHistory = [];
+    let rouletteState = null;
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (ch) => {
+        switch (ch) {
+          case "&": return "&amp;";
+          case "<": return "&lt;";
+          case ">": return "&gt;";
+          case '"': return "&quot;";
+          case "'": return "&#39;";
+          default: return ch;
+        }
+      });
+    }
+
     // Перемешивание массива (Fisher–Yates)
     function shuffle(array) {
       const arr = array.slice();
@@ -244,13 +1237,12 @@
       return arr;
     }
 
-    function generateTicket() {
-      // 1) выбираем 3 случайных блока из 5
+    // Создать один билет (3 блока, по одному вопросу в каждом)
+    function createTicket() {
       const shuffledBlocks = shuffle(blocks);
       const selectedBlocks = shuffledBlocks.slice(0, 3);
 
-      // 2) в каждом блоке выбираем один случайный вопрос
-      const ticket = selectedBlocks.map(block => {
+      return selectedBlocks.map(block => {
         const qIndex = Math.floor(Math.random() * block.questions.length);
         return {
           blockId: block.id,
@@ -258,49 +1250,700 @@
           question: block.questions[qIndex]
         };
       });
-
-      renderTicket(ticket);
     }
 
+    // Рендер основного билета
     function renderTicket(ticket) {
       const container = document.getElementById("ticketContainer");
       container.innerHTML = "";
 
+      if (!ticket || ticket.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "Билет ещё не сгенерирован.";
+        container.appendChild(empty);
+        return;
+      }
+
       const blocksWrapper = document.createElement("div");
       blocksWrapper.className = "blocks";
 
-      ticket.forEach(item => {
+      ticket.forEach((item, idx) => {
         const card = document.createElement("div");
         card.className = "block-card";
 
+        const inner = document.createElement("div");
+        inner.className = "block-inner";
+
         const tag = document.createElement("div");
         tag.className = "block-tag";
-        tag.textContent = "Блок " + item.blockId;
+        tag.innerHTML = `<span class="block-tag-badge"></span><span>Блок ${item.blockId}</span>`;
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "block-subtitle";
+        subtitle.textContent = `Часть ${idx + 1} из 3`;
+
+        const titleRow = document.createElement("div");
+        titleRow.className = "block-title-row";
 
         const title = document.createElement("div");
         title.className = "block-title";
         title.textContent = item.blockName;
 
+        titleRow.appendChild(title);
+
         const questionEl = document.createElement("div");
         questionEl.className = "question-text";
-        questionEl.innerHTML = `<span class="question-number">Вопрос ${item.question.number}:</span> ${item.question.text}`;
+        questionEl.innerHTML =
+          `<span class="question-number">Вопрос ${item.question.number}.</span> ${item.question.text}`;
 
-        card.appendChild(tag);
-        card.appendChild(title);
-        card.appendChild(questionEl);
+        inner.appendChild(tag);
+        inner.appendChild(subtitle);
+        inner.appendChild(titleRow);
+        inner.appendChild(questionEl);
 
+        card.appendChild(inner);
         blocksWrapper.appendChild(card);
       });
 
       container.appendChild(blocksWrapper);
-
-      const meta = document.getElementById("ticketMeta");
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      meta.innerHTML = `<span>Текущий билет сгенерирован в ${timeStr}. Всего блоков: 5, в билете: 3, вопросов: 3.</span>`;
     }
 
-    document.getElementById("generateBtn").addEventListener("click", generateTicket);
+    // Обновить мета-информацию о текущем билете
+    function updateTicketMeta(ticket, mode, now, durationSec, name) {
+      const meta = document.getElementById("ticketMeta");
+      const timeStr = now.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      let modeLabel;
+      if (mode === "instant") {
+        modeLabel = "мгновенная генерация";
+      } else if (mode === "roulette-skip") {
+        modeLabel = "рулетка (досрочный выбор)";
+      } else {
+        modeLabel = "рулетка";
+      }
+
+      const blocksIds = ticket.map(item => item.blockId).join(" · ");
+      const questionNumbers = ticket.map(item => item.question.number).join(", ");
+      const durationValue = Number(durationSec);
+      const hasDuration = mode !== "instant" && Number.isFinite(durationValue) && durationValue > 0;
+      const durationPart = hasDuration
+        ? `, длительность рулетки: ${durationValue.toFixed(1)} с`
+        : "";
+      const nameClean = name ? escapeHtml(name) : "";
+      const namePart = nameClean ? `, название: «${nameClean}»` : "";
+
+      meta.innerHTML =
+        `<span>Билет #${ticketCounter} сгенерирован в ${timeStr} (${modeLabel}${durationPart}${namePart}). ` +
+        `Блоки: ${blocksIds}. Номера вопросов: ${questionNumbers}.</span>`;
+    }
+
+    // Добавить билет в историю
+    function addToHistory(ticket, mode, now, name) {
+      const timeStr = now.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      const summary = {
+        id: ticketCounter,
+        time: timeStr,
+        mode,
+        name: name || "",
+        blocksInfo: ticket.map(item => ({
+          blockId: item.blockId,
+          questionNumber: item.question.number
+        }))
+      };
+
+      ticketHistory.unshift(summary);
+      renderHistory();
+    }
+
+    // Рендер истории
+    function renderHistory() {
+      const listEl = document.getElementById("historyList");
+      const emptyEl = document.getElementById("historyEmpty");
+      if (!listEl || !emptyEl) return;
+
+      if (ticketHistory.length === 0) {
+        emptyEl.style.display = "block";
+        listEl.innerHTML = "";
+        return;
+      }
+
+      emptyEl.style.display = "none";
+      listEl.innerHTML = "";
+
+      ticketHistory.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "history-item";
+
+        const header = document.createElement("div");
+        header.className = "history-item-header";
+
+        const title = document.createElement("span");
+        title.className = "history-item-title";
+        title.textContent = `Билет #${item.id}`;
+
+        const nameEl = document.createElement("span");
+        nameEl.className = "history-item-name";
+        nameEl.textContent = item.name ? `• ${item.name}` : "• Без названия";
+
+        const time = document.createElement("span");
+        time.className = "history-item-time";
+        time.textContent = item.time;
+
+        const mode = document.createElement("span");
+        mode.className = "history-item-mode";
+        mode.textContent =
+          item.mode === "instant"
+            ? "мгновенно"
+            : item.mode === "roulette-skip"
+              ? "рулетка (досрочно)"
+              : "рулетка";
+
+        header.appendChild(title);
+        header.appendChild(nameEl);
+        header.appendChild(time);
+        header.appendChild(mode);
+
+        const renameBtn = document.createElement("button");
+        renameBtn.className = "history-rename-btn";
+        renameBtn.textContent = "Переименовать";
+        renameBtn.addEventListener("click", () => {
+          renameHistoryItem(item.id);
+        });
+        header.appendChild(renameBtn);
+
+        const blocksRow = document.createElement("div");
+        blocksRow.className = "history-item-blocks";
+
+        item.blocksInfo.forEach(info => {
+          const pill = document.createElement("span");
+          pill.className = "history-pill";
+          pill.textContent = `${info.blockId}-${info.questionNumber}`;
+          blocksRow.appendChild(pill);
+        });
+
+        row.appendChild(header);
+        row.appendChild(blocksRow);
+
+        listEl.appendChild(row);
+      });
+    }
+
+    function renameHistoryItem(id) {
+      const entry = ticketHistory.find(h => h.id === id);
+      if (!entry) return;
+      const newName = prompt("Новое название билета:", entry.name || "");
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      entry.name = trimmed;
+      renderHistory();
+
+      if (currentTicketInfo && currentTicketInfo.id === id) {
+        currentTicketName = trimmed;
+        currentTicketInfo.name = trimmed;
+        if (currentTicket) {
+          updateTicketMeta(
+            currentTicket,
+            currentTicketInfo.mode,
+            currentTicketInfo.time,
+            currentTicketInfo.durationSec,
+            trimmed
+          );
+        }
+      }
+    }
+
+    // Финализировать билет (отрисовать, обновить мету и историю)
+    function finalizeTicket(ticket, mode, durationSec, name) {
+      currentTicket = ticket;
+      currentTicketName = name && name.trim ? name.trim() : "";
+      ticketCounter += 1;
+      const now = new Date();
+      currentTicketInfo = {
+        id: ticketCounter,
+        mode,
+        durationSec,
+        time: now,
+        name: currentTicketName
+      };
+      renderTicket(ticket);
+      updateTicketMeta(ticket, mode, now, durationSec, currentTicketName);
+      addToHistory(ticket, mode, now, currentTicketName);
+    }
+
+    // Подсчёт статистики: сколько всего вопросов и уникальных билетов
+    function calculateTotalTickets() {
+      let total = 0;
+      for (let i = 0; i < blocks.length - 2; i++) {
+        for (let j = i + 1; j < blocks.length - 1; j++) {
+          for (let k = j + 1; k < blocks.length; k++) {
+            const countI = blocks[i].questions.length;
+            const countJ = blocks[j].questions.length;
+            const countK = blocks[k].questions.length;
+            total += countI * countJ * countK;
+          }
+        }
+      }
+      return total;
+    }
+
+    function renderStatsBadges() {
+      const container = document.getElementById("statsBadges");
+      if (!container) return;
+
+      const totalBlocks = blocks.length;
+      const totalQuestions = blocks.reduce(
+        (sum, block) => sum + block.questions.length,
+        0
+      );
+      const totalTickets = calculateTotalTickets();
+
+      container.innerHTML = "";
+
+      const badgeBlocks = document.createElement("div");
+      badgeBlocks.className = "badge";
+      badgeBlocks.innerHTML =
+        `<span class="badge-label">блоков</span><strong>${totalBlocks}</strong>`;
+
+      const badgeQuestions = document.createElement("div");
+      badgeQuestions.className = "badge";
+      badgeQuestions.innerHTML =
+        `<span class="badge-label">вопросов</span><strong>${totalQuestions}</strong>`;
+
+      const badgeTickets = document.createElement("div");
+      badgeTickets.className = "badge";
+      badgeTickets.innerHTML =
+        `<span class="badge-label">вариантов билета</span><strong>${totalTickets.toLocaleString("ru-RU")}</strong>`;
+
+      container.appendChild(badgeBlocks);
+      container.appendChild(badgeQuestions);
+      container.appendChild(badgeTickets);
+    }
+
+    // Рендер списка всех вопросов в details
+    function renderAllQuestions() {
+      const container = document.getElementById("allQuestionsContent");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      blocks.forEach(block => {
+        const blockDiv = document.createElement("div");
+        blockDiv.className = "all-questions-block";
+
+        const title = document.createElement("div");
+        title.className = "all-questions-block-title";
+        title.textContent = block.name;
+
+        const list = document.createElement("ul");
+        list.className = "all-questions-list";
+
+        block.questions.forEach(q => {
+          const li = document.createElement("li");
+          li.innerHTML =
+            `<span class="question-number-tag">${q.number}.</span>${q.text}`;
+          list.appendChild(li);
+        });
+
+        blockDiv.appendChild(title);
+        blockDiv.appendChild(list);
+        container.appendChild(blockDiv);
+      });
+    }
+
+    // Запуск рулетки
+    function startRoulette(durationSec, ticketName) {
+      if (rouletteState) {
+        return;
+      }
+
+      const baseDurationMs = Math.max(1, Number(durationSec) || 1) * 1000;
+      const baseDurationLabel = (baseDurationMs / 1000).toFixed(1);
+      const blocksToPick = Math.min(3, blocks.length);
+      const totalStages = blocksToPick * 2;
+
+      const overlay = document.createElement("div");
+      overlay.className = "roulette-overlay";
+
+      overlay.innerHTML = `
+        <div class="roulette-panel">
+          <div class="roulette-header">
+            <div>
+              <div class="roulette-title">
+                <span>🎰</span>
+                <span id="rouletteStageTitle">Рулетка билетов</span>
+              </div>
+              <div class="roulette-subtitle">
+                <span id="rouletteStageText">Сейчас выбираем блок.</span>
+                <span> Осталось <strong><span id="rouletteCountdown">${baseDurationLabel}</span> с</strong></span>
+              </div>
+            </div>
+            <div class="roulette-progress">
+              <div class="progress-label">
+                <span id="rouletteProgressLabel">Этап 1 / ${totalStages}</span>
+                <span id="rouletteCountdownSmall">${baseDurationLabel} с</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-inner" id="rouletteProgress"></div>
+              </div>
+            </div>
+          </div>
+          <div class="roulette-stage-label" id="rouletteStageLabel">Подсвечиваем оставшиеся блоки</div>
+          <div class="roulette-picked" id="roulettePicked"></div>
+          <div class="roulette-grid" id="rouletteGrid"></div>
+          <div class="roulette-actions">
+            <div class="roulette-hint" id="rouletteHint">
+              Можно досрочно остановить этап — зафиксируется текущий подсвеченный вариант. Нажатие вне окна отменит всю генерацию.
+            </div>
+            <div class="roulette-actions-right">
+              <button class="btn-ghost" id="rouletteCancelBtn">
+                <span class="btn-icon">✕</span>
+                Отмена
+              </button>
+              <button class="btn-secondary" id="rouletteSkipBtn">
+                <span class="btn-icon">⏩</span>
+                Выбрать сейчас
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+
+      const gridEl = overlay.querySelector("#rouletteGrid");
+      const countdownEl = overlay.querySelector("#rouletteCountdown");
+      const countdownSmallEl = overlay.querySelector("#rouletteCountdownSmall");
+      const progressInner = overlay.querySelector("#rouletteProgress");
+      const progressLabelEl = overlay.querySelector("#rouletteProgressLabel");
+      const stageTitleEl = overlay.querySelector("#rouletteStageTitle");
+      const stageTextEl = overlay.querySelector("#rouletteStageText");
+      const stageLabelEl = overlay.querySelector("#rouletteStageLabel");
+      const pickedEl = overlay.querySelector("#roulettePicked");
+      const cancelBtn = overlay.querySelector("#rouletteCancelBtn");
+      const skipBtn = overlay.querySelector("#rouletteSkipBtn");
+      const hintEl = overlay.querySelector("#rouletteHint");
+
+      const state = {
+        cancelRequested: false,
+        skipUsed: false,
+        cleanupStage: null,
+        finishStageEarly: null
+      };
+      rouletteState = state;
+
+      const availableBlocks = blocks.slice();
+      const ticket = [];
+      const startedAt = performance.now();
+
+      function cleanupOverlay() {
+        overlay.classList.add("roulette-overlay-fade-out");
+        setTimeout(() => {
+          overlay.remove();
+        }, 160);
+      }
+
+      function cancelRoulette() {
+        if (state.cancelRequested) return;
+        state.cancelRequested = true;
+        if (state.cleanupStage) {
+          state.cleanupStage();
+        }
+        cleanupOverlay();
+        rouletteState = null;
+      }
+
+      cancelBtn?.addEventListener("click", cancelRoulette);
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+          cancelRoulette();
+        }
+      });
+      skipBtn?.addEventListener("click", () => {
+        if (state.finishStageEarly) {
+          state.finishStageEarly();
+        }
+      });
+
+      function formatSeconds(ms) {
+        return (ms / 1000).toFixed(1);
+      }
+
+      function updatePicked() {
+        if (!pickedEl) return;
+        pickedEl.innerHTML = "";
+        ticket.forEach(item => {
+          const pill = document.createElement("div");
+          pill.className = "roulette-picked-pill";
+          pill.innerHTML = `<strong>${item.blockId}</strong><span>Вопрос ${item.question.number}</span>`;
+          pickedEl.appendChild(pill);
+        });
+      }
+
+      function setStageInfo(stageType, block, stageNumber) {
+        const display = formatSeconds(baseDurationMs);
+        const blockLabel = block ? block.id : "?";
+        if (stageTitleEl) {
+          const partIndex = ticket.length + 1;
+          stageTitleEl.textContent =
+            stageType === "block"
+              ? `Выбор блока ${partIndex} из ${blocksToPick}`
+              : `Вопрос для блока ${blockLabel}`;
+        }
+        if (stageTextEl) {
+          stageTextEl.textContent =
+            stageType === "block"
+              ? "Подсветка случайного блока из оставшихся."
+              : `Блок ${blockLabel} выбран, выбираем вопрос.`;
+        }
+        if (stageLabelEl) {
+          stageLabelEl.textContent =
+            stageType === "block"
+              ? "Выбираем очередной блок (без повторений)"
+              : `Выбираем вопрос внутри блока ${blockLabel}`;
+        }
+        if (progressLabelEl) {
+          progressLabelEl.textContent = `Этап ${stageNumber} / ${totalStages}`;
+        }
+        if (countdownEl) countdownEl.textContent = display;
+        if (countdownSmallEl) countdownSmallEl.textContent = `${display} с`;
+        if (progressInner) progressInner.style.transform = "scaleX(1)";
+        if (hintEl) {
+          hintEl.textContent =
+            stageType === "block"
+              ? "Можно остановить этап — зафиксируется текущий подсвеченный блок. Клик вне окна отменит генерацию."
+              : "Можно остановить этап — зафиксируется подсвеченный вопрос. Клик вне окна отменит генерацию.";
+        }
+      }
+
+      function buildCard(item, stageType) {
+        const card = document.createElement("div");
+        card.className = "mini-ticket";
+
+        if (stageType === "block") {
+          card.innerHTML = `
+            <div class="mini-ticket-title">Блок ${item.id}</div>
+            <div class="mini-ticket-blocks">${item.name}</div>
+            <div class="mini-ticket-questions">Вопросов: ${item.questions.length}</div>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="mini-ticket-title">Вопрос ${item.number}</div>
+            <div class="mini-ticket-questions">${item.text}</div>
+          `;
+        }
+
+        return card;
+      }
+
+      function runStage({ stageType, items, block, stageNumber }) {
+        return new Promise((resolve, reject) => {
+          if (!gridEl || !items || items.length === 0) {
+            reject(new Error("Нет элементов для рулетки"));
+            return;
+          }
+
+          setStageInfo(stageType, block, stageNumber);
+          gridEl.innerHTML = "";
+
+          const cards = items.map(item => {
+            const card = buildCard(item, stageType);
+            gridEl.appendChild(card);
+            return card;
+          });
+
+          let activeIndex = -1;
+          function setActive(index) {
+            if (cards.length === 0) return;
+            if (activeIndex >= 0 && cards[activeIndex]) {
+              cards[activeIndex].classList.remove("is-hot");
+            }
+            activeIndex = index;
+            if (cards[activeIndex]) {
+              cards[activeIndex].classList.add("is-hot");
+            }
+          }
+
+          if (cards.length > 0) {
+            const initialIndex = Math.floor(Math.random() * cards.length);
+            setActive(initialIndex);
+          }
+
+          const tickInterval = 250;
+          const intervalId = setInterval(() => {
+            if (cards.length === 0) return;
+            const nextIndex = Math.floor(Math.random() * cards.length);
+            setActive(nextIndex);
+          }, tickInterval);
+
+          const start = performance.now();
+          const end = start + baseDurationMs;
+          let rafId = null;
+          let done = false;
+
+          function finish(early) {
+            if (done || state.cancelRequested) return;
+            done = true;
+            state.finishStageEarly = null;
+            state.cleanupStage = null;
+            clearInterval(intervalId);
+            if (rafId !== null) {
+              cancelAnimationFrame(rafId);
+            }
+
+            if (countdownEl) countdownEl.textContent = "0.0";
+            if (countdownSmallEl) countdownSmallEl.textContent = "0.0 с";
+            if (progressInner) progressInner.style.transform = "scaleX(0)";
+
+            const chosenIndex = activeIndex >= 0 ? activeIndex : 0;
+            const chosen = items[chosenIndex] || items[0];
+            if (early) {
+              state.skipUsed = true;
+            }
+            resolve(chosen);
+          }
+
+          function step(now) {
+            if (done || state.cancelRequested) return;
+            const remaining = end - now;
+            const clampedRemaining = Math.max(0, remaining);
+            const fraction = clampedRemaining / baseDurationMs;
+            const seconds = clampedRemaining / 1000;
+
+            const display = seconds.toFixed(1);
+            if (countdownEl) countdownEl.textContent = display;
+            if (countdownSmallEl) countdownSmallEl.textContent = display + " с";
+            if (progressInner) progressInner.style.transform = `scaleX(${fraction})`;
+
+            if (remaining <= 0) {
+              finish(false);
+            } else {
+              rafId = requestAnimationFrame(step);
+            }
+          }
+
+          state.finishStageEarly = () => finish(true);
+          state.cleanupStage = () => {
+            if (done) return;
+            done = true;
+            clearInterval(intervalId);
+            if (rafId !== null) {
+              cancelAnimationFrame(rafId);
+            }
+            reject(new Error("cancelled"));
+          };
+
+          rafId = requestAnimationFrame(step);
+        });
+      }
+
+      updatePicked();
+
+      (async () => {
+        try {
+          while (ticket.length < blocksToPick && availableBlocks.length > 0) {
+            if (state.cancelRequested) return;
+
+            const stageNumber = ticket.length * 2 + 1;
+            const block = await runStage({
+              stageType: "block",
+              items: availableBlocks,
+              stageNumber
+            });
+
+            if (state.cancelRequested) return;
+
+            const question = await runStage({
+              stageType: "question",
+              items: block.questions,
+              block,
+              stageNumber: stageNumber + 1
+            });
+
+            if (state.cancelRequested) return;
+
+            ticket.push({
+              blockId: block.id,
+              blockName: block.name,
+              question
+            });
+            const blockIndex = availableBlocks.findIndex(b => b.id === block.id);
+            if (blockIndex >= 0) {
+              availableBlocks.splice(blockIndex, 1);
+            }
+            updatePicked();
+          }
+
+          if (state.cancelRequested || ticket.length === 0) {
+            return;
+          }
+
+          const totalDurationSec = (performance.now() - startedAt) / 1000;
+          cleanupOverlay();
+          rouletteState = null;
+
+          const modeLabel = state.skipUsed ? "roulette-skip" : "roulette";
+          finalizeTicket(ticket, modeLabel, Number(totalDurationSec.toFixed(1)), ticketName);
+        } catch (error) {
+          if (!state.cancelRequested) {
+            cleanupOverlay();
+            rouletteState = null;
+          }
+        }
+      })();
+    }
+
+    // Мгновенная генерация билета
+    function generateInstant(name) {
+      const ticket = createTicket();
+      finalizeTicket(ticket, "instant", 0, name);
+    }
+
+    // Инициализация
+    (function init() {
+      const generateBtn = document.getElementById("generateBtn");
+      const durationControl = document.getElementById("durationControl");
+      const durationRange = document.getElementById("durationRange");
+      const durationLabel = document.getElementById("durationLabel");
+      const instantBtn = document.getElementById("instantBtn");
+      const ticketNameInput = document.getElementById("ticketNameInput");
+
+      if (generateBtn) {
+        generateBtn.addEventListener("click", () => {
+          const sec = durationRange ? parseInt(durationRange.value, 10) || 5 : 5;
+          const name = ticketNameInput?.value || "";
+          startRoulette(sec, name);
+        });
+      }
+
+      if (instantBtn) {
+        instantBtn.addEventListener("click", () => {
+          const name = ticketNameInput?.value || "";
+          generateInstant(name);
+        });
+      }
+
+      if (durationRange && durationLabel) {
+        durationLabel.textContent = durationRange.value;
+        durationRange.addEventListener("input", () => {
+          durationLabel.textContent = durationRange.value;
+        });
+      }
+
+      renderStatsBadges();
+      renderAllQuestions();
+      renderHistory();
+    })();
   </script>
 </body>
+
 </html>

@@ -1042,8 +1042,8 @@
     </h1>
 
     <div class="subtitle">
-      Нажми «Запустить генерацию», чтобы случайно получить билет из 3 тематических блоков и 3 вопросов:
-      хранение/страницы, обработка запросов и индексы, транзакции и соединения.
+      Нажми «Запустить генерацию», чтобы случайно получить билет из 3 частей:
+      для каждого блока (A, B, C) случайно выбирается тема внутри блока, а затем — вопрос в этой теме.
     </div>
 
     <div class="badges" id="statsBadges"></div>
@@ -1253,28 +1253,35 @@
       return arr;
     }
 
-    // *** Создать один билет:
-    // всегда берём все блоки A, B, C,
-    // внутри каждого блока сначала выбираем случайную тему (X),
-    // затем случайный вопрос внутри этой темы (X.Y)
+    // Вспомогательное: получить список тем внутри блока
+    function getTopicsForBlock(block) {
+      const byTopic = new Map();
+      block.questions.forEach(q => {
+        const topicId = String(q.number).split(".")[0];
+        if (!byTopic.has(topicId)) {
+          byTopic.set(topicId, []);
+        }
+        byTopic.get(topicId).push(q);
+      });
+      return Array.from(byTopic.entries()).map(([topicId, questions]) => ({
+        topicId,
+        questions
+      }));
+    }
+
+    // Создать один билет:
+    // для каждого блока (A, B, C) выбираем случайную тему, внутри неё — случайный вопрос
     function createTicket() {
       return blocks.map((block) => {
-        const topicIds = Array.from(
-          new Set(
-            block.questions.map(q => String(q.number).split(".")[0])
-          )
-        );
-        const topicId = topicIds[Math.floor(Math.random() * topicIds.length)];
-        const topicQuestions = block.questions.filter(q =>
-          String(q.number).startsWith(topicId + ".")
-        );
-        const qIndex = Math.floor(Math.random() * topicQuestions.length);
-        const question = topicQuestions[qIndex];
+        const topics = getTopicsForBlock(block);
+        const topic = topics[Math.floor(Math.random() * topics.length)];
+        const qIndex = Math.floor(Math.random() * topic.questions.length);
+        const question = topic.questions[qIndex];
 
         return {
           blockId: block.id,
           blockName: block.name,
-          topicId,
+          topicId: topic.topicId,
           question
         };
       });
@@ -1309,7 +1316,7 @@
 
         const subtitle = document.createElement("div");
         subtitle.className = "block-subtitle";
-        subtitle.textContent = `Часть ${idx + 1} из 3`;
+        subtitle.textContent = `Часть ${idx + 1} из 3 · Тема ${item.topicId}`;
 
         const titleRow = document.createElement("div");
         titleRow.className = "block-title-row";
@@ -1510,8 +1517,8 @@
 
     // Подсчёт статистики: сколько всего вопросов и уникальных билетов
     function calculateTotalTickets() {
-      // Для каждого блока: количество пар (тема, вопрос внутри темы) = просто количество вопросов.
-      // Так как мы всегда берём все 3 блока, итого — произведение размеров.
+      // Кол-во вариантов = произведение (кол-во вопросов в каждом блоке),
+      // так как выбор «тема → вопрос» даёт ту же мощность пространства.
       return blocks.reduce((acc, block) => acc * block.questions.length, 1);
     }
 
@@ -1579,7 +1586,9 @@
       });
     }
 
-    // Запуск рулетки (оставляем логику по блокам как есть, просто итоговый билет всё равно честно строится)
+    // Рулетка: для каждого блока (A,B,C) —
+    // 1) выбираем тему внутри блока
+    // 2) выбираем вопрос внутри темы
     function startRoulette(durationSec, ticketName) {
       if (rouletteState) {
         return;
@@ -1587,7 +1596,7 @@
 
       const baseDurationMs = Math.max(1, Number(durationSec) || 1) * 1000;
       const baseDurationLabel = (baseDurationMs / 1000).toFixed(1);
-      const blocksToPick = Math.min(3, blocks.length);
+      const blocksToPick = blocks.length;
       const totalStages = blocksToPick * 2;
 
       const overlay = document.createElement("div");
@@ -1602,7 +1611,7 @@
                 <span id="rouletteStageTitle">Рулетка билетов</span>
               </div>
               <div class="roulette-subtitle">
-                <span id="rouletteStageText">Сейчас выбираем блок.</span>
+                <span id="rouletteStageText">Сейчас выбираем тему для блока.</span>
                 <span> Осталось <strong><span id="rouletteCountdown">${baseDurationLabel}</span> с</strong></span>
               </div>
             </div>
@@ -1616,7 +1625,7 @@
               </div>
             </div>
           </div>
-          <div class="roulette-stage-label" id="rouletteStageLabel">Подсвечиваем оставшиеся блоки</div>
+          <div class="roulette-stage-label" id="rouletteStageLabel">Подсвечиваем возможные темы внутри блока</div>
           <div class="roulette-picked" id="roulettePicked"></div>
           <div class="roulette-grid" id="rouletteGrid"></div>
           <div class="roulette-actions">
@@ -1660,7 +1669,6 @@
       };
       rouletteState = state;
 
-      const availableBlocks = blocks.slice();
       const ticket = [];
       const startedAt = performance.now();
 
@@ -1703,32 +1711,32 @@
         ticket.forEach(item => {
           const pill = document.createElement("div");
           pill.className = "roulette-picked-pill";
-          pill.innerHTML = `<strong>${item.blockId}</strong><span>Вопрос ${item.question.number}</span>`;
+          pill.innerHTML = `<strong>${item.blockId}</strong><span>Тема ${item.topicId}, вопрос ${item.question.number}</span>`;
           pickedEl.appendChild(pill);
         });
       }
 
-      function setStageInfo(stageType, block, stageNumber) {
+      function setStageInfo(stageType, block, stageNumber, partIndex) {
         const display = formatSeconds(baseDurationMs);
         const blockLabel = block ? block.id : "?";
+
         if (stageTitleEl) {
-          const partIndex = ticket.length + 1;
           stageTitleEl.textContent =
-            stageType === "block"
-              ? `Выбор блока ${partIndex} из ${blocksToPick}`
-              : `Вопрос для блока ${blockLabel}`;
+            stageType === "topic"
+              ? `Часть ${partIndex} из ${blocksToPick}: выбираем тему для блока ${blockLabel}`
+              : `Часть ${partIndex} из ${blocksToPick}: выбираем вопрос в теме блока ${blockLabel}`;
         }
         if (stageTextEl) {
           stageTextEl.textContent =
-            stageType === "block"
-              ? "Подсветка случайного блока из оставшихся."
-              : `Блок ${blockLabel} выбран, выбираем вопрос.`;
+            stageType === "topic"
+              ? `Подсветка случайной темы внутри блока ${blockLabel}.`
+              : `Тема выбрана, выбираем конкретный вопрос.`;
         }
         if (stageLabelEl) {
           stageLabelEl.textContent =
-            stageType === "block"
-              ? "Выбираем очередной блок (без повторений)"
-              : `Выбираем вопрос внутри блока ${blockLabel}`;
+            stageType === "topic"
+              ? `Выбираем тему внутри блока ${blockLabel}`
+              : `Выбираем вопрос в выбранной теме блока ${blockLabel}`;
         }
         if (progressLabelEl) {
           progressLabelEl.textContent = `Этап ${stageNumber} / ${totalStages}`;
@@ -1738,23 +1746,22 @@
         if (progressInner) progressInner.style.transform = "scaleX(1)";
         if (hintEl) {
           hintEl.textContent =
-            stageType === "block"
-              ? "Можно остановить этап — зафиксируется текущий подсвеченный блок. Клик вне окна отменит генерацию."
+            stageType === "topic"
+              ? "Можно остановить этап — зафиксируется текущая подсвеченная тема. Клик вне окна отменит генерацию."
               : "Можно остановить этап — зафиксируется подсвеченный вопрос. Клик вне окна отменит генерацию.";
         }
       }
 
-      function buildCard(item, stageType) {
+      function buildCard(item, stageType, block) {
         const card = document.createElement("div");
         card.className = "mini-ticket";
 
-        if (stageType === "block") {
+        if (stageType === "topic") {
           card.innerHTML = `
-            <div class="mini-ticket-title">Блок ${item.id}</div>
-            <div class="mini-ticket-blocks">${item.name}</div>
-            <div class="mini-ticket-questions">Вопросов: ${item.questions.length}</div>
+            <div class="mini-ticket-title">Блок ${block.id} · Тема ${item.topicId}</div>
+            <div class="mini-ticket-questions">Вопросов в теме: ${item.questions.length}</div>
           `;
-        } else {
+        } else { // question
           card.innerHTML = `
             <div class="mini-ticket-title">Вопрос ${item.number}</div>
             <div class="mini-ticket-questions">${item.text}</div>
@@ -1764,18 +1771,18 @@
         return card;
       }
 
-      function runStage({ stageType, items, block, stageNumber }) {
+      function runStage({ stageType, items, block, stageNumber, partIndex }) {
         return new Promise((resolve, reject) => {
           if (!gridEl || !items || items.length === 0) {
             reject(new Error("Нет элементов для рулетки"));
             return;
           }
 
-          setStageInfo(stageType, block, stageNumber);
+          setStageInfo(stageType, block, stageNumber, partIndex);
           gridEl.innerHTML = "";
 
           const cards = items.map(item => {
-            const card = buildCard(item, stageType);
+            const card = buildCard(item, stageType, block);
             gridEl.appendChild(card);
             return card;
           });
@@ -1869,32 +1876,34 @@
 
       (async () => {
         try {
-          while (ticket.length < blocksToPick && availableBlocks.length > 0) {
+          for (let i = 0; i < blocksToPick; i++) {
             if (state.cancelRequested) return;
 
-            const stageNumber = ticket.length * 2 + 1;
-            const block = await runStage({
-              stageType: "block",
-              items: availableBlocks,
-              stageNumber
+            const block = blocks[i];
+            const partIndex = i + 1;
+            const stageNumberTopic = i * 2 + 1;
+            const stageNumberQuestion = i * 2 + 2;
+
+            const topics = getTopicsForBlock(block);
+
+            // Этап 1: выбираем тему
+            const topic = await runStage({
+              stageType: "topic",
+              items: topics,
+              block,
+              stageNumber: stageNumberTopic,
+              partIndex
             });
 
             if (state.cancelRequested) return;
 
-            // внутри выбранного блока честно выбираем тему и вопрос так же, как в createTicket
-            const topicIds = Array.from(
-              new Set(block.questions.map(q => String(q.number).split(".")[0]))
-            );
-            const topicId = topicIds[Math.floor(Math.random() * topicIds.length)];
-            const topicQuestions = block.questions.filter(q =>
-              String(q.number).startsWith(topicId + ".")
-            );
-
+            // Этап 2: выбираем вопрос внутри этой темы
             const question = await runStage({
               stageType: "question",
-              items: topicQuestions,
+              items: topic.questions,
               block,
-              stageNumber: stageNumber + 1
+              stageNumber: stageNumberQuestion,
+              partIndex
             });
 
             if (state.cancelRequested) return;
@@ -1902,13 +1911,10 @@
             ticket.push({
               blockId: block.id,
               blockName: block.name,
-              topicId,
+              topicId: topic.topicId,
               question
             });
-            const blockIndex = availableBlocks.findIndex(b => b.id === block.id);
-            if (blockIndex >= 0) {
-              availableBlocks.splice(blockIndex, 1);
-            }
+
             updatePicked();
           }
 

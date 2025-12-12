@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Генератор экзаменационного билета по JVM/Java</title>
+  <title>Генератор экзаменационного билета по Database Internals</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
@@ -1063,13 +1063,13 @@
 <body>
   <div class="app">
     <h1>
-      Генератор билета по JVM / Java Internals
+      Генератор билета по Database Internals (PostgreSQL)
       <span class="title-pill">exam mode</span>
     </h1>
 
     <div class="subtitle">
-      Нажми «Запустить генерацию», чтобы случайно получить билет из 3 блоков и 3 вопросов. Можно включить режим
-      «рулетки», чтобы выбор выглядел как мини-лотерея.
+      Нажми «Запустить генерацию», чтобы случайно получить билет из 3 тематических блоков и 3 вопросов:
+      хранение/страницы, обработка запросов и индексы, транзакции и соединения.
     </div>
 
     <div class="badges" id="statsBadges"></div>
@@ -1108,12 +1108,13 @@
 
     <div id="ticketContainer">
       <div class="empty-state">
-        Здесь появятся выбранные блоки и вопросы. Каждый билет содержит 3 блока из 5 и 3 вопроса.
+        Здесь появятся выбранные блоки и вопросы. Каждый билет содержит 3 блока и 3 вопроса.
       </div>
     </div>
 
     <div class="hint">
-      Вопросы пронумерованы так же, как в исходном списке (<strong>1–38</strong>), чтобы совпадали с конспектами.
+      Нумерация вопросов вида <strong>X.Y</strong> совпадает с темой и номером вопроса
+      на странице экзамена в вики (X — номер темы, Y — номер вопроса).
     </div>
 
     <div class="history">
@@ -1134,74 +1135,115 @@
   </div>
 
   <script>
-    // Описание блоков и вопросов
+    // Описание блоков и вопросов для Database Internals
+    // Нумерация X.Y: X — тема, Y — номер вопроса в теме
+
     const blocks = [
       {
         id: "A",
-        name: "Блок A — Платформа и кроссплатформенность Java",
+        name: "Блок A — Страница, буферный менеджер, каталоги (Темы 1–3)",
         questions: [
-          { number: 1, text: "Как Java решает кроссплатформенность?" },
-          { number: 2, text: "Безопасность памяти в Java. Инструкции, GC, верификация." },
-          { number: 3, text: "От исходного кода к выполнению. Компиляция, линковка, packaging, верификация, JIT." },
-          { number: 4, text: "Стэковая и регистровая машины. Почему выбрана стэковая?" }
+          // Тема 1. Architecture. Page layout
+          { number: "1.1", text: "SQL-запрос: путь через уровни СУБД от строки до чтения данных с диска." },
+          { number: "1.2", text: "Зачем СУБД вводит собственные страницы (8/16 КБ) поверх блоков ОС?" },
+          { number: "1.3", text: "Инварианты lower/upper/slotCount на странице. Что будет, если lower > upper?" },
+          { number: "1.4", text: "Роль массива слотов. Что происходит с tuple при soft delete и почему не удаляем сразу?" },
+          { number: "1.5", text: "Зачем нужен nullmask внутри tuple? Разница NULL и \"\" на уровне хранения." },
+
+          // Тема 2. Shared buffers / Buffer Manager
+          { number: "2.1", text: "Зачем в СУБД нужен буферный менеджер вообще?" },
+          { number: "2.2", text: "Что происходит при обращении к странице: cache hit vs cache miss?" },
+          { number: "2.3", text: "Что такое Buffer Pool и какие три ключевых компонента он включает в PostgreSQL?" },
+          { number: "2.4", text: "Сравнение FIFO, LRU и Clock: идея, сложность реализации, практика." },
+          { number: "2.5", text: "Clock-sweep в PostgreSQL: usage_count и критерии выбора страницы на вытеснение." },
+          { number: "2.6", text: "Что такое dirty-страница, когда она появляется и почему не пишется на диск сразу?" },
+          { number: "2.7", text: "Разница между Background Writer и Checkpointer в PostgreSQL и их задачи." },
+
+          // Тема 3. Catalog Management
+          { number: "3.1", text: "Что такое менеджер каталогов и зона ответственности Catalog Manager?" },
+          { number: "3.2", text: "Зачем нужны системные каталоги и почему БД называют самоописывающейся?" },
+          { number: "3.3", text: "Минимальный набор информации в системных каталогах: схемы, таблицы, столбцы, типы." },
+          { number: "3.4", text: "Что хранит каталог таблиц (pg_class) и как он связывает логическое имя с физическими файлами?" },
+          { number: "3.5", text: "Что хранит каталог атрибутов (pg_attribute) и зачем он нужен?" },
+          { number: "3.6", text: "Как Catalog Manager работает с Buffer Manager и страницами при изменении каталогов?" }
         ]
       },
       {
         id: "B",
-        name: "Блок B — Байткод, class file, вызовы и generics",
+        name: "Блок B — Парсинг, планы, join’ы, индексы, оптимизатор (Темы 4–9)",
         questions: [
-          { number: 5, text: "vtable и itable. Как и когда резолвятся методы? Что делается в момент самого вызова?" },
-          { number: 6, text: "Анатомия stack frame. Локальные переменные, опстэк. Указатель this." },
-          { number: 7, text: "Этапы линковки класса." },
-          { number: 8, text: "Анатомия class file. Constant pool, атрибуты, stack maps." },
-          { number: 9, text: "Constant pool и как он используется. Типы констант." },
-          { number: 10, text: "Дескриптор метода и кодирование типов. Для чего нужно? Как влияют generics?" },
-          { number: 11, text: "JVM инструкции: ALU, load/store и типизированность операций." },
-          { number: 12, text: "JVM инструкции: вызовы. Какие инструкции и в чем разница? Поиск (lookup) метода и собственно вызов." },
-          { number: 13, text: "invokedynamic: BSM, MethodHandle, Callsite. Как работает? Как передаются доп аргументы?" },
-          { number: 31, text: "Как работает type erasure при использовании generics?" }
+          // Тема 4. AST и SQL Parsing
+          { number: "4.1", text: "Три этапа SQL-парсинга: Lexer, Parser, Semantic Analyzer и их результаты." },
+          { number: "4.2", text: "Чем AST отличается от Query Tree и когда происходит переход?" },
+          { number: "4.3", text: "Что такое токен и как лексер выделяет токены для простого SELECT-запроса?" },
+          { number: "4.4", text: "Почему AST представляют деревом, а не линейной последовательностью?" },
+          { number: "4.5", text: "Основные типы узлов AST для SQL (SelectStmt, RangeVar, AExpr и др.)." },
+          { number: "4.6", text: "Как учитывается приоритет операторов при построении дерева WHERE (AND/OR)?" },
+          { number: "4.7", text: "Чем отличаются AExpr и BoolExpr и как они связаны с бинарными и логическими выражениями?" },
+          { number: "4.8", text: "Что делает семантический анализатор после AST и какие ошибки он ловит?" },
+
+          // Тема 5. Логический план и базовые исполнители
+          { number: "5.1", text: "Что такое Planner и какую задачу он решает в архитектуре СУБД?" },
+          { number: "5.2", text: "Разница между логическим и физическим планом. Приведи пример." },
+          { number: "5.3", text: "Как выглядит логический план для SELECT name FROM users WHERE age > 18?" },
+          { number: "5.4", text: "Зачем выделять Planner отдельно от Optimizer и Executor?" },
+          { number: "5.5", text: "Роль Optimizer и отличие от Planner." },
+          { number: "5.6", text: "Итераторная (Volcano) модель исполнителей: какие методы реализует Executor?" },
+          { number: "5.7", text: "Почему исполнители напоминают паттерн Decorator? Пример цепочки исполнителей." },
+
+          // Тема 6. JOIN без индексов
+          { number: "6.1", text: "Что произойдёт в INNER JOIN, если у строки слева несколько совпадений справа?" },
+          { number: "6.2", text: "Поведение LEFT JOIN, если для строки слева нет совпадений справа." },
+          { number: "6.3", text: "Идея Nested Loop Join: пошаговое описание работы." },
+          { number: "6.4", text: "Асимптотическая сложность NLJ и от чего она зависит." },
+          { number: "6.5", text: "Как выбор outer и inner таблицы влияет на производительность NLJ?" },
+          { number: "6.6", text: "Как NLJ выглядит в Volcano/Iterator модели (open/next/close) и дерево исполнителей?" },
+          { number: "6.7", text: "Чем Nested Loop Join принципиально отличается от Sort-Merge и Hash Join?" },
+
+          // Тема 7. Hash индексы
+          { number: "7.1", text: "Принцип работы hash-индекса: bucket по ключу, роль hash-функции, TID/ctid." },
+          { number: "7.2", text: "Типы страниц hash-индекса: метастраница, bucket, overflow, bitmap." },
+          { number: "7.3", text: "Зачем нужны overflow-страницы и как они привязаны к конкретному bucket?" },
+          { number: "7.4", text: "Linear hashing в hash-индексе: highmask, lowmask, max_bucket." },
+          { number: "7.5", text: "Вставка в hash-индекс: от ключа до (hash, TID) на нужной странице." },
+          { number: "7.6", text: "Поиск по равенству в hash-индексе и почему сложность близка к O(1)." },
+          { number: "7.7", text: "Почему hash-индекс lossy и зачем recheck условия на уровне таблицы?" },
+
+          // Тема 8. B+-Tree индекс
+          { number: "8.1", text: "Чем B+-tree отличается от hash-индекса по поддержке range-запросов?" },
+          { number: "8.2", text: "Internal vs leaf узлы B+-tree и зачем листья связывают через sibling-ссылки?" },
+          { number: "8.3", text: "Поиск ключа в B+-tree: от корня до листа; как делать range scan [from, to]." },
+          { number: "8.4", text: "Что такое порядок дерева t и какие ограничения он задаёт на число ключей?" },
+          { number: "8.5", text: "Чем split внутреннего узла отличается от split листа?" },
+
+          // Тема 9. Оптимизатор
+          { number: "9.1", text: "Зачем нужен Optimizer, если уже есть Planner и Executor?" },
+          { number: "9.2", text: "Как из одного логического оператора получить несколько физических вариантов плана?" },
+          { number: "9.3", text: "Что такое cost model PostgreSQL и параметры seq_page_cost, random_page_cost, cpu_tuple_cost, cpu_operator_cost?" },
+          { number: "9.4", text: "Как оптимизатор оценивает стоимость Hash Join (build/probe, startup cost, total cost)?" },
+          { number: "9.5", text: "Что делает ANALYZE / auto-analyze и как плохая статистика портит план?" },
+          { number: "9.6", text: "EXPLAIN vs EXPLAIN ANALYZE: что означают cost, rows, width, actual time, rows, loops?" }
         ]
       },
       {
         id: "C",
-        name: "Блок C — JIT, оптимизации и динамика выполнения",
+        name: "Блок C — Транзакции, WAL, CLI и соединения (Темы 10–11)",
         questions: [
-          { number: 14, text: "JIT: что компилируется? Что такое горячие методы? Какая информация собирается?" },
-          { number: 15, text: "JIT: в чем заключается спекулятивность? Pros and cons." },
-          { number: 16, text: "JIT: interpreted, C1, C2. Когда происходит тразит? Какие транзиты есть?" },
-          { number: 17, text: "JIT: как происходит подмена кода туда и обратно?" },
-          { number: 18, text: "Что такое деоптимизация и когда происходит? Зачем?" },
-          { number: 19, text: "Constant folding, safety checks removal optimiztions. Удалание общих подвыражений." },
-          { number: 20, text: "Escape analysis. Замена аллокаций на куче на объекты на стэке." },
-          { number: 21, text: "Девиртуализация и inlining. Monomorphic, bimorphic, megaporhic. Speculation." },
-          { number: 30, text: "Почему динамическая загрузка классов может «сломать» JIT-оптимизацию?" }
-        ]
-      },
-      {
-        id: "D",
-        name: "Блок D — Сборка мусора и layout объектов",
-        questions: [
-          { number: 22, text: "Mark-and-sweep algorithm." },
-          { number: 23, text: "Как параллелится MnS?" },
-          { number: 24, text: "Как MnS делается неполным? Регионы, RSets." },
-          { number: 25, text: "Как MnS делается concurrent? TAMS, modification queue." },
-          { number: 26, text: "Tricolor marking algorithm." },
-          { number: 27, text: "Как отмечаются живые объекты? Mark bitmap." },
-          { number: 28, text: "Зачем нужны регионы? Eden, young, survivior, old, humongous, free." },
-          { number: 29, text: "Compaction. Algorithm, parallelisation." },
-          { number: 32, text: "Что содержится в заголовке объекта (mark word, klass pointer)? Как используется?" },
-          { number: 33, text: "Что такое GC roots? Как JVM добивается остановки программы в нужном месте?" }
-        ]
-      },
-      {
-        id: "E",
-        name: "Блок E — Java Memory Model и многопоточность",
-        questions: [
-          { number: 34, text: "Memory order: что такое? Что такое conflicting ops? Data race? Почему возникают? Модель CPU." },
-          { number: 35, text: "Что такое sequential consistency? Как data race free и SC связаны?" },
-          { number: 36, text: "3 проблемы multithreaded кода: visibility, order, atomicity. Как решается atomicity? Word tearing." },
-          { number: 37, text: "Как решается visibility and order? Happens before. Корректность с точки зрения happens before." },
-          { number: 38, text: "Свойства happens before. Транзитивность. Соотношение с program order. Acquire-release semantics. Какие операции синхронизованны по happens-before?" }
+          // Тема 10. Транзакции
+          { number: "10.1", text: "Какие изменения в представлении данных на странице нужны для поддержки транзакций и MVCC?" },
+          { number: "10.2", text: "Функции менеджера транзакций и какие структуры данных он использует для состояний." },
+          { number: "10.3", text: "Что такое WAL, как он обеспечивает атомарность/долговечность и как связан с другими компонентами?" },
+          { number: "10.4", text: "Обязанности менеджера блокировок и основные типы блокировок." },
+          { number: "10.5", text: "Что такое deadlock (взаимная блокировка) в терминах транзакций?" },
+          { number: "10.6", text: "Через какие ключевые компоненты проходит запрос внутри транзакции и в каком порядке?" },
+
+          // Тема 11. CLI и сокеты
+          { number: "11.1", text: "Что такое сокет в клиент–серверном взаимодействии и роль сокетов для PostgreSQL?" },
+          { number: "11.2", text: "Роль процесса postmaster при установлении нового соединения." },
+          { number: "11.3", text: "Что такое backend-процесс PostgreSQL и как он связан с клиентским соединением?" },
+          { number: "11.4", text: "Жизненный цикл соединения: от connect() до завершения backend-процесса (по шагам)." },
+          { number: "11.5", text: "Чем сессия отличается от транзакции в PostgreSQL? Короткие определения." },
+          { number: "11.6", text: "Почему большое число одновременных соединений (max_connections ≫ 100) плохо для сервера?" }
         ]
       }
     ];
